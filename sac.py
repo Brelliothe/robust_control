@@ -210,7 +210,7 @@ def soft_q_update(batch_size,
         )
 
 
-env = NormalizedActions(gym.make("InvertedPendulum-v0"))
+env = NormalizedActions(gym.make("ContinuousCartpole-v0"))
 
 action_dim = env.action_space.shape[0]
 state_dim = env.observation_space.shape[0]
@@ -240,7 +240,7 @@ replay_buffer_size = 1000000
 replay_buffer = ReplayBuffer(replay_buffer_size)
 
 max_frames  = 40000
-max_steps   = 500
+max_steps   = 50
 frame_idx   = 0
 rewards     = []
 batch_size  = 64
@@ -250,7 +250,7 @@ while frame_idx < max_frames:
     episode_reward = 0
 
     for step in range(max_steps):
-        #env.render()
+        # env.render()
         action = policy_net.get_action(state)
         next_state, reward, done, _ = env.step(action)
 
@@ -265,7 +265,27 @@ while frame_idx < max_frames:
         if frame_idx % 40000 == 0:
             plot(frame_idx, rewards)
 
-        if done:
-            break
+    rewards.append(episode_reward)
+
+env.close()
+
+env = NormalizedActions(gym.make("ContinuousCartpole-v1"))
+reward = []
+frame_idx = 0
+while frame_idx < max_frames:
+    state = env.reset()
+    episode_reward = 0
+
+    for step in range(max_steps):
+        # env.render()
+        action = policy_net.get_action(state)
+        next_state, reward, done, _ = env.step(action)
+
+        state = next_state
+        episode_reward += reward
+        frame_idx += 1
+
+        if frame_idx % 40000 == 0:
+            plot(frame_idx, rewards)
 
     rewards.append(episode_reward)
